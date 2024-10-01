@@ -17,7 +17,7 @@ function! s:complete_branches(arg_lead, cmd_line, cursor_pos) abort
   return join(l:list, "\n")
 endfunction
 
-command! -nargs=? -complete=custom,s:complete_branches PR call create_pr#from_cmdline(<q-args>)
+command! -nargs=* -complete=custom,s:complete_branches PR call create_pr#from_cmdline(<f-args>)
 command! -nargs=0 RepoPage call create_pr#open_repo_page()
 
 augroup vim_create_pr

@@ -6,40 +6,27 @@ Works with `Github`, `Bitbucket` and `Gitlab` out of the box. Can be [extended](
 
 ## Installation
 
-Using [vim-packager](https://github.com/kristijanhusak/vim-packager)
+Using [lazy](https://github.com/folke/lazy.nvim)
 
-```vimL
-function! PackagerInit() abort
-  packadd vim-packager
-  call packager#init()
-  call packager#add('kristijanhusak/vim-packager', { 'type': 'opt' })
-  call packager#add('kristijanhusak/vim-create-pr')
-
-  "Optional packages, but highly recommended
-  call packager#add('sodapopcan/vim-twiggy')
-  call packager#add('tpope/vim-fugitive')
-endfunction
+```lua
+{ 'mattsanders/vim-create-pr' }
 ```
 
 ## Usage
 
-Through command line (Can be autocompleted):
+Use one of the following commands:
 
-```
-:PR branchname
-```
+- `:PR` Opens a PR for the current branch
+- `:PR target_name` Opens a PR for the current branch comparing the target branch
+- `:PR target_name branch_name` Opens a PR for the selected branch comparing the target branch
 
-Or if you want to use current branch, just omit the branch name
-
-```
-:PR
-```
+Branch names can be autocompleted.
 
 If you are using [vim-twiggy](https://github.com/sodapopcan/vim-twiggy),
 select a branch from list and press `pr`.
 
-
 If you want to open only repository page in browser, run this:
+
 ```
 :RepoPage
 ```
@@ -54,6 +41,10 @@ variable to your vimrc, using example below:
 ```vimL
 let g:create_pr_git_services = {
 \ 'my.gitlab.com': 'https://my.gitlab.com/{{owner}}/{{repository}}/merge_requests/new?merge_request[source_branch]={{branch_name}}'
+\ }
+
+let g:create_pr_with_target_git_services = {
+\ 'my.gitlab.com': 'https://my.gitlab.com/{{owner}}/{{repository}}/merge_requests/new?merge_request[source_branch]={{branch_name}}&merge_request[target_branch]={{target_branch_name}}'
 \ }
 ```
 
@@ -73,5 +64,3 @@ Example:
 ```vimL
 let g:create_pr_browser = 'firefox'
 ```
-
-

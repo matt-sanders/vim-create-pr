@@ -4,12 +4,19 @@ let s:git_services = extend({
       \ 'gitlab.com': 'https://gitlab.com/{{owner}}/{{repository}}/merge_requests/new?merge_request[source_branch]={{branch_name}}',
 \ }, get(g:, 'create_pr_git_services', {}))
 
+let s:git_target_services = extend({
+      \ 'github.com': 'https://github.com/{{owner}}/{{repository}}/compare/{{target_branch_name}}...{{branch_name}}?expand=1',
+\ }, get(g:, 'create_pr_with_target_git_services', {}))
+
 function! create_pr#from_cmdline(...) abort
-  let l:branch_name = !empty(get(a:, '1'))
-        \ ? a:1
+  let l:target_name = get(a:, '1')
+
+  let l:branch_name = !empty(get(a:, '2'))
+        \ ? a:2
         \ : s:get_current_branch_name()
 
-  return s:open_pr(l:branch_name)
+
+  return s:open_pr(l:branch_name, l:target_name)
 endfunction
 
 function! create_pr#from_twiggy() abort
@@ -25,14 +32,16 @@ function! create_pr#open_repo_page()
   return s:system_async(escape(printf('%s %s', l:browser_executable, l:remote_url), '?&%'))
 endfunction
 
-function! s:open_pr(branch) abort
+function! s:open_pr(branch, target) abort
   try
     call s:check_remote_exists(a:branch)
 
     let l:remote_url = s:get_remote_url()
-    let l:git_service = s:get_git_service(l:remote_url)
+    let l:git_service = empty(a:target)
+        \ ? s:get_git_service(l:remote_url, s:git_services)
+        \ : s:get_git_service(l:remote_url, s:git_target_services)
 
-    let l:url = s:generate_url(l:git_service, l:remote_url, a:branch)
+    let l:url = s:generate_url(l:git_service, l:remote_url, a:branch, a:target)
     let l:browser_executable = s:get_browser()
 
     return s:system_async(escape(printf('%s %s', l:browser_executable, l:url), '?&%'))
@@ -41,21 +50,22 @@ function! s:open_pr(branch) abort
   endtry
 endfunction
 
-function s:generate_url(git_service, remote_url, branch) abort
+function s:generate_url(git_service, remote_url, branch, target) abort
   let [l:owner, l:repository] = s:get_repo_info_from_remote_url(a:remote_url)
 
   let l:url = substitute(copy(a:git_service), '{{owner}}', l:owner, '')
   let l:url = substitute(l:url, '{{repository}}', l:repository, '')
   let l:url = substitute(l:url, '{{branch_name}}', a:branch, '')
+  let l:url = substitute(l:url, '{{target_branch_name}}', a:target, '')
 
   return l:url
 endfunction
 
-function! s:get_git_service(remote_url) abort
+function! s:get_git_service(remote_url, services) abort
   let l:service = ''
-  for l:git_service in keys(s:git_services)
+  for l:git_service in keys(a:services)
     if a:remote_url =~? l:git_service
-      let l:service = s:git_services[l:git_service]
+      let l:service = a:services[l:git_service]
       break
     endif
   endfor
