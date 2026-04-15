@@ -6,6 +6,7 @@ let s:git_services = extend({
 
 let s:git_target_services = extend({
       \ 'github.com': 'https://github.com/{{owner}}/{{repository}}/compare/{{target_branch_name}}...{{branch_name}}?expand=1',
+      \ 'bitbucket.org': 'https://bitbucket.org/{{owner}}/{{repository}}/pull-requests/new?source={{branch_name}}&dest={{target_branch_name}}&t=1',
 \ }, get(g:, 'create_pr_with_target_git_services', {}))
 
 function! create_pr#from_cmdline(...) abort
